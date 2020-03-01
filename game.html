@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Project 3</title>
+        <meta charset="utf-8">
+        <style>
+            canvas {
+                background-color: #AEDFE4;
+            }
+        </style>
+        <link href="https://fonts.googleapis.com/css?family=Trade+Winds&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Oxanium|Trade+Winds&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <canvas id="canvas-game" width="700" height="450">
+             This will be displayed if your browser doesn't
+             support the canvas element. The closing tag is
+             necessary.
+        </canvas>
+        
+        <audio id="alarm">
+            <source src="audio/alarm.mp3" type="audio/mp3">
+        </audio>
+        
+        <audio id="red">
+            <source src="audio/Red-alert.mp3" type="audio/mp3">
+        </audio>
+        
+        <audio id="no">
+            <source src="audio/No.mp3" type="audio/mp3">
+        </audio>
+        
+        <script>
+            //canvas + context
+            const canvas = document.querySelector("#canvas-game");
+            const ctx = canvas.getContext("2d");
+            
+            //sounds
+            const alarm = document.querySelector("#alarm");
+            const redAlert = document.querySelector("#red");
+            const noAlert = document.querySelector("#no");
+            redAlert.play();
+            
+            //Images
+            var backgroundImage = new Image();
+            backgroundImage.src = "img/background.webp";
+            
+            var playerImg = new Image();
+            playerImg.src = "img/SpongeBob.webp";
+            
+            var harmImg = new Image();
+            harmImg.src = "img/plankton.png";
+            
+            var benImg = new Image();
+            benImg.src = "img/formula.png";
+            
+            //left and right movement
+            let left = false;
+            let right = false;
+            
+            //light flicker
+            let counter = 0;
+            let op = false;
+            
+            //game + player objects
+            let benObj = {x: 400, y: -200, width: 50, height: 96, speed: 1, one: 2, two: 3, three: 4, four: 5};
+            let harmObj = {x: 100, y: -260, width: 200, height: 260, speed: 2, one: 4, two: 6, three: 8, four: 10};
+            let harmHitBox = {x: harmObj.x + 97, y: harmObj.y+105, width: 87, height: 154};
+            let player = {x:canvas.width/2 - 62.5, y:canvas.height-canvas.height/2, width: 125, height: 200, speed: 6};
+            let playerHitBox = {x: player.x + 15, y: player.y + 48, width: 95, height: 150};
+            let game = {lives: 3, score:0, level: 1, one: 2, two: 3, three: 4, four: 5}
+            
+            
+            //keydown event listener
+            document.addEventListener("keydown", (event) => {
+              event.preventDefault();
+              if (event.keyCode == 37) { // LEFT
+                left = true;
+              }
+              if (event.keyCode == 39) { // RIGHT
+                right = true;
+              }
+            });
+            
+            //keyup event listener
+            document.addEventListener("keyup", (event) => {
+              event.preventDefault();
+              if (event.keyCode == 37) { // LEFT
+                left = false;
+              }
+              if (event.keyCode == 39) { // RIGHT
+                right = false;
+              }
+            });
+            
+            
+            //fucntion for hitbox
+            function isWithin(a, b, c) {
+              return (a > b && a < c);
+            }
+            
+            //main game loop
+            const draw = () => {
+                // clear
+                
+                ctx.clearRect(0,0, canvas.width, canvas.height); //clears anything in that rectangle
+                ctx.drawImage(backgroundImage,0,0, canvas.width, canvas.height);
+
+                // update values
+                
+                if(left){
+                    player.x -= player.speed;
+                    playerHitBox.x -= player.speed;
+                }
+                
+                if(right){
+                    player.x += player.speed;
+                    playerHitBox.x += player.speed;
+                }
+                
+                
+                //up the difficulty depending on score
+                switch(game.score){
+                    case 100: 
+                      game.level = game.one;
+                      harmObj.speed =  harmObj.one;
+                      benObj.speed = benObj.one;
+                      break;
+                    case 220:
+                      game.level = game.two;
+                      harmObj.speed =  harmObj.two;
+                      benObj.speed = benObj.two;
+                      break;
+                    case 340:
+                      game.level = game.three;
+                      harmObj.speed =  harmObj.three;
+                      benObj.speed = benObj.three;
+                      break;
+                    case 460:
+                      game.level = game.four;
+                      harmObj.speed =  harmObj.four;
+                      benObj.speed = benObj.four;
+                      break;
+                }
+
+                
+                //object speeds
+                harmObj.y += harmObj.speed;
+                harmHitBox.y += harmObj.speed;
+                benObj.y += benObj.speed;
+                
+                
+                //draw
+               
+                
+                //reset harm obj at the top
+                if(harmObj.y > canvas.height){ 
+                    harmObj.y = -harmObj.height;
+                    harmObj.x = Math.floor((Math.random() * (canvas.width - harmObj.width)));
+                    harmHitBox.y = harmObj.y + 105;
+                    harmHitBox.x = harmObj.x + 97;
+                }
+                
+                //reset benefit obj at the top
+                if(benObj.y > canvas.height){ 
+                    benObj.y = -benObj.height;
+                    benObj.x = Math.floor((Math.random() * (canvas.width - benObj.width)));
+                }
+                
+                // Collide with the harm object
+                if (isWithin(harmHitBox.x, playerHitBox.x, playerHitBox.x + playerHitBox.width) || isWithin(harmHitBox.x + harmHitBox.width, playerHitBox.x, playerHitBox.x + playerHitBox.width)) { // X
+                    if (isWithin(harmHitBox.y, playerHitBox.y, playerHitBox.y + playerHitBox.height) || isWithin(harmHitBox.y + harmHitBox.height, playerHitBox.y, playerHitBox.y + playerHitBox.y)) { // Y
+                        // Respawn the target
+                        harmObj.y = -harmObj.height -28;
+                        harmObj.x = Math.floor((Math.random() * (canvas.width - harmObj.width)));
+                        harmHitBox.y = harmObj.y + 105;
+                        harmHitBox.x = harmObj.x + 97;
+                        // Decrease lives
+                        game.lives--;
+                        noAlert.play();
+                    }
+                }
+                
+                // Collide with the benefit object
+                if (isWithin(benObj.x, playerHitBox.x, playerHitBox.x + playerHitBox.width) || isWithin(benObj.x + benObj.width, playerHitBox.x, playerHitBox.x + playerHitBox.width)) { // X
+                    if (isWithin(benObj.y, playerHitBox.y, playerHitBox.y + playerHitBox.height) || isWithin(benObj.y + benObj.height, playerHitBox.y, playerHitBox.y + playerHitBox.y)) { // Y
+                        // Respawn the target
+                        benObj.y = -benObj.height;
+                        benObj.x = Math.floor((Math.random() * (canvas.width - benObj.width)));
+                        // Increase the score
+                        game.score+=20;
+                    }
+                }
+                
+                //set boundaries of player
+                if(player.x + player.width > canvas.width+17 ){
+                    player.x = canvas.width-player.width+17;
+                    playerHitBox.x = player.x+15;
+                }
+                if(player.x < -15 ){
+                    player.x = -15;
+                    playerHitBox.x = 0;
+                }
+                
+                ctx.beginPath();
+
+                //draw benefit obj
+                ctx.drawImage(benImg, benObj.x, benObj.y, benObj.width, benObj.height);
+                
+                //draw harm obj
+                ctx.drawImage(harmImg, harmObj.x, harmObj.y, harmObj.width, harmObj.height);
+                
+                //draw player
+                ctx.drawImage(playerImg,player.x,player.y, player.width, player.height);
+                
+                
+                //calculate flicker
+                counter++;
+                if(counter == 120){
+                    op=!op;
+                    counter = 0;
+                }
+                if(op){
+                    alarm.play();
+                    ctx.fillStyle = "rgba(207, 0, 15, 0.5)";
+                    ctx.rect(0,0, canvas.width, canvas.height);
+                }
+                
+                //end of drawing
+                ctx.fill();
+                ctx.stroke();
+                ctx.closePath();
+                
+                //repeat
+                
+                
+                //display game details
+                ctx.fillStyle = 'MidnightBlue';
+                ctx.font = '24px oxanium';
+                ctx.textAlign = 'left';
+                ctx.fillText('Level: ' + game.level, canvas.width/80, canvas.height-canvas.height/6.5);
+                ctx.fillText('Score: ' + game.score, canvas.width/80, canvas.height-canvas.height/11);
+                ctx.fillText('Lives: ' + game.lives, canvas.width/80, canvas.height-canvas.height/30);
+                
+                // End the game if needed
+                if (game.lives == 0) {
+                    endGame();
+                } else {
+                    window.requestAnimationFrame(draw);
+                }               
+                
+            }
+            
+            //end game screen
+            endGame = () => {
+                ctx.font = "95px Trade Winds";
+                ctx.fillStyle = "maroon";
+                ctx.textAlign = "center";
+                ctx.fillText("GAME OVER", canvas.width/2 , canvas.height/2.5); 
+            }
+            
+            draw();
+            
+            
+            
+        </script>
+    </body>
+</html>

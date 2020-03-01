@@ -1,57 +1,107 @@
-<!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
-        <title>Canvas Demo</title>
+        <title>Project 3</title>
+        <meta charset="utf-8">
+        <style>
+            canvas {
+                background-color: #AEDFE4;
+            }
+        </style>
+        <link href="https://fonts.googleapis.com/css?family=Trade+Winds&display=swap" rel="stylesheet"> 
+        <link href="https://fonts.googleapis.com/css?family=Oxanium|Trade+Winds&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Simonetta&display=swap" rel="stylesheet"> 
     </head>
     <body>
-        <canvas id="canvas-demo" width="400" height="400">
+        <canvas id="canvas-home" width="700" height="450">
              This will be displayed if your browser doesn't
              support the canvas element. The closing tag is
              necessary.
         </canvas>
         
         <script>
-            const canvas = document.querySelector("#canvas-demo");
+            //canvas + context
+            const canvas = document.querySelector("#canvas-home");
             const ctx = canvas.getContext("2d");
+           
+            //image
+            var background = new Image();
+            background.src = "img/pineapple.png";
             
-            let player = {x:100, y:100, radius: 30};
+            //text flicker
+            let counter = 0;
+            let dark = true;
             
+            //any keydown event listener
+            document.addEventListener("keyup", (event) => {
+              window.location.href = "game.html";
+            });         
+            
+          
+            //main draw loop
             const draw = () => {
-                // clear
                 
+                //clear and add to counter
                 ctx.clearRect(0,0, canvas.width, canvas.height); //clears anything in that rectangle
+                ctx.drawImage(background,0,0, canvas.width, canvas.height);
+                counter++;
                 
-                // update values
+                //specifications for title
+                ctx.font = "40px Trade Winds";
+                ctx.fillStyle = "indigo";
+                ctx.textAlign = "center";
+                ctx.fillText("The Krusty Krab", canvas.width/2 , canvas.height/7); 
+                       
+                //specifications for paragraph
+                ctx.font = "35px Simonetta";
+                ctx.fillStyle = "midnightblue";
+                ctx.textAlign = "left";
+                let text = "Is under attack! Plankton has figured out how to become GIANT and is after the Krabby Patty Formula! He has found the vault to Mr. Krabs's copies of the Formula. Help Spongebob bring the Formulas to safety by avoiding the giant Plankton and using the Left and Right arrow keys."
+                wrapText(ctx, text, canvas.width/9, canvas.height/3.85, canvas.width - canvas.width/9, 40)
                 
-                player.x += 1;
-                
-                //draw
-                
-                
-                if(player.x > canvas.width + player.radius){
-                    player.x = -player.radius;
+                //flicker light
+                if(counter == 60){
+                    dark = !dark;
+                    counter = 0;
                 }
                 
-                ctx.beginPath();
-                ctx.fillStyle = 'blue';
-                ctx.strokeStyle = "red";
-                ctx.lineWidth = 5;
-
-                ctx.arc(player.x, player.y, player.radius, 0, 2 * Math.PI, false);
-
-                ctx.fill();
-                ctx.stroke();
-                ctx.closePath();
+                if(dark){
+                    ctx.fillStyle = "mediumblue";
+                }else{
+                    ctx.fillStyle = "Teal";
+                }
                 
-                //repeat
-                
-                window.requestAnimationFrame(draw); //put it in the task queue, IF possible call 60times/sec
+                //specifications for bottom text
+                ctx.font = "35px Oxanium";
+                ctx.textAlign = "center";
+                ctx.fillText("Press Any Key To Play", canvas.width/2 , canvas.height- canvas.height/12);            
+                            
+                window.requestAnimationFrame(draw); 
             }
             
             draw();
             
             
             
+           //function to wrap text found @ https://www.html5canvastutorials.com/tutorials/html5-canvas-wrap-text-tutorial/ 
+           function wrapText(context, text, x, y, maxWidth, lineHeight) {
+            var words = text.split(' ');
+            var line = '';
+
+            for(var n = 0; n < words.length; n++) {
+              var testLine = line + words[n] + ' ';
+              var metrics = context.measureText(testLine);
+              var testWidth = metrics.width;
+              if (testWidth > maxWidth && n > 0) {
+                context.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+              }
+              else {
+                line = testLine;
+              }
+            }
+            context.fillText(line, x, y);
+          }
         </script>
     </body>
 </html>
