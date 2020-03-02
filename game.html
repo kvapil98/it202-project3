@@ -42,16 +42,16 @@
             redAlert.play();
             
             //Images
-            var backgroundImage = new Image();
+            let backgroundImage = new Image();
             backgroundImage.src = "img/background.webp";
             
-            var playerImg = new Image();
+            let playerImg = new Image();
             playerImg.src = "img/SpongeBob.webp";
             
-            var harmImg = new Image();
+            let harmImg = new Image();
             harmImg.src = "img/plankton.png";
             
-            var benImg = new Image();
+            let benImg = new Image();
             benImg.src = "img/formula.png";
             
             //left and right movement
@@ -95,7 +95,7 @@
             
             
             //fucntion for hitbox
-            function isWithin(a, b, c) {
+            const isWithin = (a, b, c) => {
               return (a > b && a < c);
             }
             

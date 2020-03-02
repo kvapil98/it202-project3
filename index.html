@@ -24,7 +24,7 @@
             const ctx = canvas.getContext("2d");
            
             //image
-            var background = new Image();
+            let background = new Image();
             background.src = "img/pineapple.png";
             
             //text flicker
@@ -37,6 +37,28 @@
             });         
             
           
+           //function to wrap text found @ https://www.html5canvastutorials.com/tutorials/html5-canvas-wrap-text-tutorial/ 
+           const wrapText = (context, text, x, y, maxWidth, lineHeight) => {
+            let words = text.split(' ');
+            let line = '';
+
+            for(let n = 0; n < words.length; n++) {
+              let testLine = line + words[n] + ' ';
+              let metrics = context.measureText(testLine);
+              let testWidth = metrics.width;
+              if (testWidth > maxWidth && n > 0) {
+                context.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+              }
+              else {
+                line = testLine;
+              }
+            }
+            context.fillText(line, x, y);
+          }            
+            
+            
             //main draw loop
             const draw = () => {
                 
@@ -81,27 +103,6 @@
             draw();
             
             
-            
-           //function to wrap text found @ https://www.html5canvastutorials.com/tutorials/html5-canvas-wrap-text-tutorial/ 
-           function wrapText(context, text, x, y, maxWidth, lineHeight) {
-            var words = text.split(' ');
-            var line = '';
-
-            for(var n = 0; n < words.length; n++) {
-              var testLine = line + words[n] + ' ';
-              var metrics = context.measureText(testLine);
-              var testWidth = metrics.width;
-              if (testWidth > maxWidth && n > 0) {
-                context.fillText(line, x, y);
-                line = words[n] + ' ';
-                y += lineHeight;
-              }
-              else {
-                line = testLine;
-              }
-            }
-            context.fillText(line, x, y);
-          }
         </script>
     </body>
 </html>
